@@ -431,7 +431,7 @@ export default function Dashboard() {
 
         {/* ══════════════ DASHBOARD PAGE ══════════════ */}
         {activePage === "Dashboard" && (
-          <div className="flex-1 overflow-y-auto px-4 md:px-7 pb-6" style={{ display: "grid", gridTemplateRows: "auto auto 1fr auto", gap: 16, background: "#eef0f5" }}>
+          <div className="flex-1 overflow-y-auto px-4 md:px-7 pb-6 flex flex-col gap-4" style={{ background: "#eef0f5" }}>
 
             {/* ── Stat cards row ── */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -511,10 +511,10 @@ export default function Dashboard() {
             </div>
 
             {/* ── Main grid — 1 col on mobile, 3 col on desktop ── */}
-            <div className="grid grid-cols-1 md:grid-cols-[1fr_1fr_260px] gap-4 min-h-0">
+            <div className="grid grid-cols-1 md:grid-cols-[1fr_1fr_260px] gap-4" style={{ minHeight: 0 }}>
 
               {/* My Tasks */}
-              <div className="hov-card rounded-2xl flex flex-col overflow-hidden" style={{ background: "#fffef5", border: "1px solid rgba(245,200,66,0.25)", boxShadow: "0 4px 16px rgba(245,200,66,0.1)", borderTop: "3px solid #f5c842", minHeight: 280 }}>
+              <div className="hov-card rounded-2xl flex flex-col overflow-hidden" style={{ background: "#fffef5", border: "1px solid rgba(245,200,66,0.25)", boxShadow: "0 4px 16px rgba(245,200,66,0.1)", borderTop: "3px solid #f5c842" }}>
                 <div className="px-5 pt-4 pb-3 shrink-0" style={{ borderBottom: "1px solid rgba(245,200,66,0.12)" }}>
                   <div className="flex items-center gap-2.5 mb-2.5">
                     <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" style={{ background: "linear-gradient(135deg,#f5c842,#f97316)" }}>
@@ -541,7 +541,7 @@ export default function Dashboard() {
                       style={newPriority === "urgent" ? { background: "#ef4444", color: "#fff" } : { background: "#f0ebe3", color: "#9b8f82" }}>🔴 Urgent</button>
                   </div>
                 </div>
-                <div className="flex-1 overflow-y-auto px-3 py-3 space-y-1.5">
+                <div className="px-3 py-3 space-y-1.5">
                   {[...tasks].sort((a, _b) => a.priority === "urgent" ? -1 : 1).map(task => (
                     <div key={task.id} className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl group transition-all"
                       style={{ background: task.done ? "rgba(245,200,66,0.05)" : task.priority === "urgent" ? "#fff1f0" : "#fff", border: `1px solid ${task.done ? "rgba(245,200,66,0.15)" : task.priority === "urgent" ? "#ffd6d3" : "rgba(245,200,66,0.3)"}` }}>
@@ -556,7 +556,7 @@ export default function Dashboard() {
               </div>
 
               {/* Team Tasks */}
-              <div className="hov-card rounded-2xl flex flex-col overflow-hidden" style={{ background: "#faf8ff", border: "1px solid rgba(139,92,246,0.2)", boxShadow: "0 4px 16px rgba(139,92,246,0.1)", borderTop: "3px solid #8b5cf6", minHeight: 280 }}>
+              <div className="hov-card rounded-2xl flex flex-col overflow-hidden" style={{ background: "#faf8ff", border: "1px solid rgba(139,92,246,0.2)", boxShadow: "0 4px 16px rgba(139,92,246,0.1)", borderTop: "3px solid #8b5cf6" }}>
                 <div className="px-5 pt-4 pb-3 shrink-0" style={{ borderBottom: "1px solid rgba(139,92,246,0.1)" }}>
                   <div className="flex items-center gap-2.5 mb-2.5">
                     <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" style={{ background: "linear-gradient(135deg,#8b5cf6,#7c3aed)" }}>
@@ -589,7 +589,7 @@ export default function Dashboard() {
                     ))}
                   </div>
                 </div>
-                <div className="flex-1 overflow-y-auto px-3 py-3 space-y-1.5">
+                <div className="px-3 py-3 space-y-1.5">
                   {teamTasks.map(task => (
                     <div key={task.id} className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl group transition-all"
                       style={{ background: task.done ? "rgba(139,92,246,0.05)" : "#fff", border: `1px solid ${task.done ? "rgba(139,92,246,0.12)" : "rgba(139,92,246,0.25)"}` }}>
@@ -638,7 +638,7 @@ export default function Dashboard() {
 
                 {/* Weekly Goals dark card */}
                 <div className="rounded-2xl flex flex-col overflow-hidden flex-1"
-                  style={{ background: "#0f1419", border: "1px solid rgba(255,255,255,0.06)", boxShadow: "0 4px 16px rgba(0,0,0,0.2)", minHeight: 200 }}>
+                  style={{ background: "#0f1419", border: "1px solid rgba(255,255,255,0.06)", boxShadow: "0 4px 16px rgba(0,0,0,0.2)" }}>
                   <div className="px-4 pt-4 pb-3 shrink-0" style={{ borderBottom: "1px solid rgba(255,255,255,0.07)" }}>
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-[9px] font-black uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.4)" }}>Weekly Goals</span>
@@ -653,7 +653,7 @@ export default function Dashboard() {
                       <button onClick={addGoal} className="px-2.5 py-1.5 rounded-xl text-[11px] font-bold shrink-0" style={{ background: "#f5c842", color: "#1a1a2e" }}>Add</button>
                     </div>
                   </div>
-                  <div className="flex-1 overflow-y-auto px-3 py-3 space-y-1.5">
+                  <div className="px-3 py-3 space-y-1.5">
                     {goals.map(goal => (
                       <div key={goal.id} className="flex items-center gap-2.5 px-3 py-2 rounded-xl group"
                         style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.06)" }}>
