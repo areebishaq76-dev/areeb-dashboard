@@ -43,6 +43,18 @@ body {
 @media (max-width: 767px) {
   .desktop-only { display: none !important; }
 
+  .app-wrapper {
+    height: auto !important;
+    overflow: visible !important;
+    min-height: 100vh;
+  }
+
+  .app-wrapper > div {
+    height: auto !important;
+    overflow: visible !important;
+    flex: 1;
+  }
+
   .dash-grid {
     display: flex !important;
     flex-direction: column !important;

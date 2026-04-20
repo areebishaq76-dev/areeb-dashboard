@@ -265,7 +265,7 @@ export default function Dashboard() {
   );
 
   return (
-    <div className="flex h-screen overflow-hidden" style={{ background: "#eef0f5", fontFamily: "'Inter', -apple-system, sans-serif" }}>
+    <div className="app-wrapper flex h-screen overflow-hidden" style={{ background: "#eef0f5", fontFamily: "'Inter', -apple-system, sans-serif" }}>
     <style>{`
       @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
       * { box-sizing: border-box; }
