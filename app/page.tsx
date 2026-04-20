@@ -87,8 +87,10 @@ export default function Dashboard() {
   }
 
   function scheduleUrgentReminder(id: string, text: string) {
+    // Cancel any existing timer for this task
     if (urgentTimers.current[id]) clearTimeout(urgentTimers.current[id]);
     urgentTimers.current[id] = setTimeout(() => {
+      // Only fire if task still exists and is not done
       setTasks(prev => {
         const task = prev.find(t => t.id === id);
         if (task && !task.done && task.priority === "urgent") {
@@ -101,7 +103,7 @@ export default function Dashboard() {
         }
         return prev;
       });
-    }, 30 * 60 * 1000);
+    }, 30 * 60 * 1000); // 30 minutes
   }
 
   function cancelUrgentReminder(id: string) {
@@ -219,14 +221,6 @@ export default function Dashboard() {
 
   const [activePage, setActivePage] = useState("Dashboard");
 
-  // ── Mobile sidebar state ──
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-
-  // Close sidebar when page changes on mobile
-  function navigateTo(page: string) {
-    setActivePage(page);
-    setSidebarOpen(false);
-  }
 
   // ── Derived stats ──
   const doneTasks = tasks.filter(t => t.done).length;
@@ -235,6 +229,7 @@ export default function Dashboard() {
   const doneGoals = goals.filter(g => g.done).length;
   const taskPct = tasks.length ? Math.round((doneTasks / tasks.length) * 100) : 0;
   const goalPct = goals.length ? Math.round((doneGoals / goals.length) * 100) : 0;
+
 
   const greeting = time.getHours() < 12 ? "Good morning" : time.getHours() < 17 ? "Good afternoon" : "Good evening";
   const quote = QUOTES[new Date().getDate() % QUOTES.length];
@@ -256,77 +251,6 @@ export default function Dashboard() {
     borderRadius: 12, padding: "6px 12px", fontSize: 12, outline: "none", width: "100%",
   });
 
-  // ── Sidebar inner content (reused for both desktop and mobile drawer) ──
-  const SidebarContent = ({ onNav }: { onNav: (page: string) => void }) => (
-    <>
-      {/* Brand */}
-      <div className="px-5 pt-6 pb-5 flex items-center gap-3">
-        <div className="w-8 h-8 rounded-lg flex items-center justify-center text-[11px] font-black shrink-0"
-          style={{ background: "linear-gradient(135deg,#6366f1,#8b5cf6)", boxShadow: "0 4px 12px rgba(99,102,241,0.4)" }}>
-          <span style={{ color: "#fff" }}>CS</span>
-        </div>
-        <div>
-          <p className="text-[13px] font-bold leading-none" style={{ color: "#fff" }}>CodesSavvy</p>
-          <p className="text-[10px]" style={{ color: "rgba(255,255,255,0.35)" }}>Management</p>
-        </div>
-      </div>
-
-      {/* Profile */}
-      <div className="mx-3 mb-5 rounded-xl p-3 flex items-center gap-2.5" style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.08)" }}>
-        <div className="relative shrink-0">
-          <div className="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-black"
-            style={{ background: "linear-gradient(135deg,#f59e0b,#f97316)" }}>
-            <span style={{ color: "#fff" }}>{username[0]?.toUpperCase() || "?"}</span>
-          </div>
-          <div className="absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full" style={{ background: "#22c55e", border: "1.5px solid #0f1419" }} />
-        </div>
-        <div className="min-w-0 flex-1">
-          <p className="text-[12px] font-semibold leading-none truncate" style={{ color: "#fff" }}>{username}</p>
-          <p className="text-[10px] mt-0.5" style={{ color: "rgba(255,255,255,0.35)" }}>Team Member</p>
-        </div>
-        <button onClick={signOut} title="Sign out" className="shrink-0 opacity-40 hover:opacity-100 transition-opacity">
-          <svg width="14" height="14" fill="none" stroke="rgba(255,255,255,0.8)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-        </button>
-      </div>
-
-      {/* Nav label */}
-      <p className="px-5 mb-1 text-[9px] font-bold tracking-widest uppercase" style={{ color: "rgba(255,255,255,0.2)" }}>Navigation</p>
-
-      {/* Nav items */}
-      <nav className="flex-1 px-3 space-y-0.5 overflow-y-auto">
-        {navItems.map(item => {
-          const badge =
-            item.label === "My Tasks" ? urgentTasks :
-            item.label === "Upwork Jobs" ? jobs.length :
-            item.label === "Team Tasks" ? teamTasks.filter(t => !t.done).length :
-            item.label === "Weekly Goals" ? goals.filter(g => !g.done).length : 0;
-          const active = activePage === item.label;
-          return (
-            <button key={item.label} onClick={() => onNav(item.label)}
-              className={`nav-btn${active ? " nav-active" : ""} w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left cursor-pointer`}
-              style={active
-                ? { background: "rgba(99,102,241,0.2)", color: "#a5b4fc", border: "1px solid rgba(99,102,241,0.3)" }
-                : { color: "rgba(255,255,255,0.45)", background: "transparent", border: "1px solid transparent" }}>
-              <span style={{ color: active ? "#a5b4fc" : "rgba(255,255,255,0.3)" }}>{item.icon}</span>
-              <span className="text-[12px] font-medium">{item.label}</span>
-              {badge > 0 && (
-                <span className="ml-auto text-[9px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center"
-                  style={{ background: active ? "rgba(99,102,241,0.4)" : "rgba(239,68,68,0.9)", color: "#fff" }}>{badge}</span>
-              )}
-            </button>
-          );
-        })}
-      </nav>
-
-      {/* Clock */}
-      <div className="m-3 mt-2 rounded-xl px-4 py-3" style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.07)" }}>
-        <p className="text-[18px] font-black font-mono leading-none" style={{ color: "#fff" }}>
-          {time.toLocaleTimeString("en-PK", { hour: "2-digit", minute: "2-digit" })}
-        </p>
-        <p className="text-[9px] mt-1" style={{ color: "rgba(255,255,255,0.3)" }}>Pakistan Standard Time</p>
-      </div>
-    </>
-  );
 
   if (loading) return (
     <div className="flex h-screen items-center justify-center" style={{ background: "#0f1419", fontFamily: "'Inter', -apple-system, sans-serif" }}>
@@ -353,77 +277,124 @@ export default function Dashboard() {
       ::-webkit-scrollbar { width: 4px; }
       ::-webkit-scrollbar-track { background: transparent; }
       ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 4px; }
-      .mobile-drawer { transform: translateX(-100%); transition: transform 0.25s ease; }
-      .mobile-drawer.open { transform: translateX(0); }
+      @media (max-width: 767px) {
+        .desktop-only { display: none !important; }
+        .mobile-scroll { overflow-y: auto !important; overflow-x: hidden !important; }
+      }
+      @media (min-width: 768px) {
+        .mobile-only { display: none !important; }
+      }
     `}</style>
 
-      {/* ══════════════ SIDEBAR — Desktop only ══════════════ */}
-      <aside className="hidden md:flex w-[220px] shrink-0 flex-col" style={{ background: "#0f1419", borderRight: "1px solid rgba(255,255,255,0.06)" }}>
-        <SidebarContent onNav={navigateTo} />
-      </aside>
+      {/* ══════════════ SIDEBAR (desktop only) ══════════════ */}
+      <aside className="desktop-only w-[220px] shrink-0 flex flex-col" style={{ background: "#0f1419", borderRight: "1px solid rgba(255,255,255,0.06)" }}>
 
-      {/* ══════════════ MOBILE SIDEBAR DRAWER ══════════════ */}
-      {/* Overlay */}
-      <div
-        className={`fixed inset-0 z-40 md:hidden transition-opacity duration-250 ${sidebarOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}`}
-        style={{ background: "rgba(0,0,0,0.6)" }}
-        onClick={() => setSidebarOpen(false)}
-      />
-      {/* Drawer */}
-      <aside
-        className={`fixed top-0 left-0 z-50 h-full w-[260px] flex flex-col md:hidden mobile-drawer ${sidebarOpen ? "open" : ""}`}
-        style={{ background: "#0f1419", borderRight: "1px solid rgba(255,255,255,0.06)" }}
-      >
-        {/* Close button */}
-        <button
-          onClick={() => setSidebarOpen(false)}
-          className="absolute top-4 right-4 w-7 h-7 rounded-lg flex items-center justify-center z-10"
-          style={{ background: "rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.6)" }}
-        >
-          <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" viewBox="0 0 24 24">
-            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-          </svg>
-        </button>
-        <SidebarContent onNav={navigateTo} />
+        {/* Brand */}
+        <div className="px-5 pt-6 pb-5 flex items-center gap-3">
+          <div className="w-8 h-8 rounded-lg flex items-center justify-center text-[11px] font-black shrink-0"
+            style={{ background: "linear-gradient(135deg,#6366f1,#8b5cf6)", boxShadow: "0 4px 12px rgba(99,102,241,0.4)" }}>
+            <span style={{ color: "#fff" }}>CS</span>
+          </div>
+          <div>
+            <p className="text-[13px] font-bold leading-none" style={{ color: "#fff" }}>CodesSavvy</p>
+            <p className="text-[10px]" style={{ color: "rgba(255,255,255,0.35)" }}>Management</p>
+          </div>
+        </div>
+
+        {/* Profile */}
+        <div className="mx-3 mb-5 rounded-xl p-3 flex items-center gap-2.5" style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.08)" }}>
+          <div className="relative shrink-0">
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-black"
+              style={{ background: "linear-gradient(135deg,#f59e0b,#f97316)" }}>
+              <span style={{ color: "#fff" }}>{username[0]?.toUpperCase() || "?"}</span>
+            </div>
+            <div className="absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full" style={{ background: "#22c55e", border: "1.5px solid #0f1419" }} />
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="text-[12px] font-semibold leading-none truncate" style={{ color: "#fff" }}>{username}</p>
+            <p className="text-[10px] mt-0.5" style={{ color: "rgba(255,255,255,0.35)" }}>Team Member</p>
+          </div>
+          <button onClick={signOut} title="Sign out" className="shrink-0 opacity-40 hover:opacity-100 transition-opacity">
+            <svg width="14" height="14" fill="none" stroke="rgba(255,255,255,0.8)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          </button>
+        </div>
+
+        {/* Nav label */}
+        <p className="px-5 mb-1 text-[9px] font-bold tracking-widest uppercase" style={{ color: "rgba(255,255,255,0.2)" }}>Navigation</p>
+
+        {/* Nav items */}
+        <nav className="flex-1 px-3 space-y-0.5 overflow-y-auto">
+          {navItems.map(item => {
+            const badge =
+              item.label === "My Tasks" ? urgentTasks :
+              item.label === "Upwork Jobs" ? jobs.length :
+              item.label === "Team Tasks" ? teamTasks.filter(t => !t.done).length :
+              item.label === "Weekly Goals" ? goals.filter(g => !g.done).length : 0;
+            const active = activePage === item.label;
+            return (
+              <button key={item.label} onClick={() => setActivePage(item.label)}
+                className={`nav-btn${active ? " nav-active" : ""} w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left cursor-pointer`}
+                style={active
+                  ? { background: "rgba(99,102,241,0.2)", color: "#a5b4fc", border: "1px solid rgba(99,102,241,0.3)" }
+                  : { color: "rgba(255,255,255,0.45)", background: "transparent", border: "1px solid transparent" }}>
+                <span style={{ color: active ? "#a5b4fc" : "rgba(255,255,255,0.3)" }}>{item.icon}</span>
+                <span className="text-[12px] font-medium">{item.label}</span>
+                {badge > 0 && (
+                  <span className="ml-auto text-[9px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center"
+                    style={{ background: active ? "rgba(99,102,241,0.4)" : "rgba(239,68,68,0.9)", color: "#fff" }}>{badge}</span>
+                )}
+              </button>
+            );
+          })}
+        </nav>
+
+        {/* Clock */}
+        <div className="m-3 mt-2 rounded-xl px-4 py-3" style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.07)" }}>
+          <p className="text-[18px] font-black font-mono leading-none" style={{ color: "#fff" }}>
+            {time.toLocaleTimeString("en-PK", { hour: "2-digit", minute: "2-digit" })}
+          </p>
+          <p className="text-[9px] mt-1" style={{ color: "rgba(255,255,255,0.3)" }}>Pakistan Standard Time</p>
+        </div>
       </aside>
 
       {/* ══════════════ PAGE CONTENT ══════════════ */}
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden" style={{ background: "#eef0f5" }}>
+      {/* Mobile bottom nav */}
+      <nav className="mobile-only fixed bottom-0 left-0 right-0 z-50 flex items-center justify-around px-2 py-2" style={{ background: "#0f1419", borderTop: "1px solid rgba(255,255,255,0.08)" }}>
+        {navItems.map(item => {
+          const active = activePage === item.label;
+          return (
+            <button key={item.label} onClick={() => setActivePage(item.label)} className="flex flex-col items-center gap-1 px-2 py-1 rounded-xl"
+              style={{ color: active ? "#a5b4fc" : "rgba(255,255,255,0.35)", minWidth: 44 }}>
+              <span style={{ color: active ? "#a5b4fc" : "rgba(255,255,255,0.3)" }}>{item.icon}</span>
+              <span style={{ fontSize: 9, fontWeight: 700 }}>{item.label.split(" ")[0]}</span>
+            </button>
+          );
+        })}
+      </nav>
 
         {/* ── Top header ── */}
-        <header className="shrink-0 px-4 md:px-7 pt-4 md:pt-6 pb-3 md:pb-4 flex items-center justify-between gap-3" style={{ background: "#eef0f5" }}>
-          <div className="flex items-center gap-3 min-w-0">
-            {/* Hamburger — mobile only */}
-            <button
-              onClick={() => setSidebarOpen(true)}
-              className="md:hidden shrink-0 w-9 h-9 rounded-xl flex items-center justify-center"
-              style={{ background: "#fff", border: "1px solid rgba(0,0,0,0.08)", boxShadow: "0 2px 8px rgba(0,0,0,0.06)" }}
-            >
-              <svg width="16" height="16" fill="none" stroke="#1a1a2e" strokeWidth="2" strokeLinecap="round" viewBox="0 0 24 24">
-                <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
-              </svg>
-            </button>
-            <div className="min-w-0">
-              <p className="hidden sm:block text-[11px] font-medium mb-0.5" style={{ color: "#a09080", letterSpacing: "0.02em" }}>
-                {time.toLocaleDateString("en-PK", { weekday: "long", month: "long", day: "numeric", year: "numeric" })}
-              </p>
-              <h1 className="text-[18px] md:text-[24px] font-black leading-none tracking-tight truncate" style={{ color: "#1a1a2e" }}>
-                {activePage === "Dashboard" ? `${greeting}, ${username} 👋` : activePage}
-              </h1>
-              <p className="hidden sm:block text-[12px] mt-1" style={{ color: "#a09080" }}>
-                {activePage === "Dashboard" && "Here's your operational overview for today"}
-                {activePage === "My Tasks" && "Track and prioritize your personal tasks"}
-                {activePage === "Team Tasks" && "Assign and monitor tasks across the team"}
-                {activePage === "Upwork Jobs" && "Track shortlisted jobs through your proposal pipeline"}
-                {activePage === "Weekly Goals" && "Set and track your goals for the week"}
-                {activePage === "Notes" && "Daily reminders, follow-ups, and meeting notes"}
-              </p>
-            </div>
+        <header className="shrink-0 px-4 md:px-7 pt-4 md:pt-6 pb-3 md:pb-4 flex items-center justify-between" style={{ background: "#eef0f5" }}>
+          <div className="min-w-0 flex-1 pr-3">
+            <p className="hidden md:block text-[11px] font-medium mb-1" style={{ color: "#a09080", letterSpacing: "0.02em" }}>
+              {time.toLocaleDateString("en-PK", { weekday: "long", month: "long", day: "numeric", year: "numeric" })}
+            </p>
+            <h1 className="text-[18px] md:text-[24px] font-black leading-none tracking-tight truncate" style={{ color: "#1a1a2e" }}>
+              {activePage === "Dashboard" ? `${greeting}, ${username} 👋` : activePage}
+            </h1>
+            <p className="hidden md:block text-[12px] mt-1.5" style={{ color: "#a09080" }}>
+              {activePage === "Dashboard" && "Here's your operational overview for today"}
+              {activePage === "My Tasks" && "Track and prioritize your personal tasks"}
+              {activePage === "Team Tasks" && "Assign and monitor tasks across the team"}
+              {activePage === "Upwork Jobs" && "Track shortlisted jobs through your proposal pipeline"}
+              {activePage === "Weekly Goals" && "Set and track your goals for the week"}
+              {activePage === "Notes" && "Daily reminders, follow-ups, and meeting notes"}
+            </p>
           </div>
           {/* Live time badge */}
-          <div className="rounded-2xl px-3 md:px-4 py-2 md:py-2.5 shrink-0" style={{ background: "#fff", border: "1px solid rgba(0,0,0,0.06)", boxShadow: "0 2px 8px rgba(0,0,0,0.05)" }}>
-            <p className="text-[10px] md:text-[11px] font-semibold" style={{ color: "#a09080" }}>Today</p>
-            <p className="text-[15px] md:text-[18px] font-black font-mono leading-tight" style={{ color: "#1a1a2e" }}>
+          <div className="rounded-2xl px-4 py-2.5 shrink-0" style={{ background: "#fff", border: "1px solid rgba(0,0,0,0.06)", boxShadow: "0 2px 8px rgba(0,0,0,0.05)" }}>
+            <p className="text-[11px] font-semibold" style={{ color: "#a09080" }}>Today</p>
+            <p className="text-[18px] font-black font-mono leading-tight" style={{ color: "#1a1a2e" }}>
               {time.toLocaleTimeString("en-PK", { hour: "2-digit", minute: "2-digit" })}
             </p>
           </div>
@@ -431,7 +402,7 @@ export default function Dashboard() {
 
         {/* ══════════════ DASHBOARD PAGE ══════════════ */}
         {activePage === "Dashboard" && (
-          <div className="flex-1 overflow-y-auto px-4 md:px-7 pb-6 flex flex-col gap-4" style={{ background: "#eef0f5" }}>
+          <div className="flex-1 overflow-y-auto px-4 md:px-7 pb-20 md:pb-6" style={{ display: "grid", gridTemplateRows: "auto auto 1fr auto", gap: 16, background: "#eef0f5" }}>
 
             {/* ── Stat cards row ── */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -481,15 +452,17 @@ export default function Dashboard() {
                   icon: <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>,
                 },
               ].map(s => (
-                <div key={s.label} className="hov-card rounded-2xl px-4 md:px-5 py-4 relative overflow-hidden"
+                <div key={s.label} className="hov-card rounded-2xl px-5 py-4 relative overflow-hidden"
                   style={{ background: s.bg, boxShadow: "0 4px 20px rgba(0,0,0,0.15)" }}>
+                  {/* Decorative circle */}
                   <div className="absolute -top-4 -right-4 w-20 h-20 rounded-full" style={{ background: "rgba(255,255,255,0.08)" }} />
                   <div className="absolute -bottom-6 -right-2 w-16 h-16 rounded-full" style={{ background: "rgba(255,255,255,0.05)" }} />
+                  {/* Icon */}
                   <div className="w-8 h-8 rounded-xl flex items-center justify-center mb-3 relative" style={{ background: "rgba(255,255,255,0.18)", color: "#fff" }}>
                     {s.icon}
                   </div>
                   <p className="text-[10px] font-bold uppercase tracking-widest mb-1.5 relative" style={{ color: "rgba(255,255,255,0.65)" }}>{s.label}</p>
-                  <p className="text-[22px] md:text-[28px] font-black leading-none tracking-tight mb-1 relative" style={{ color: s.numColor }}>{s.value}</p>
+                  <p className="text-[28px] font-black leading-none tracking-tight mb-1 relative" style={{ color: s.numColor }}>{s.value}</p>
                   <p className="text-[11px] font-medium mb-3 relative" style={{ color: s.subColor }}>{s.sub}</p>
                   {s.bar !== null && (
                     <div className="w-full rounded-full h-1 relative" style={{ background: s.barBg }}>
@@ -501,7 +474,7 @@ export default function Dashboard() {
             </div>
 
             {/* ── Quote strip ── */}
-            <div className="rounded-2xl px-4 md:px-5 py-3.5 flex items-center gap-4 relative overflow-hidden"
+            <div className="rounded-2xl px-5 py-3.5 flex items-center gap-4 relative overflow-hidden"
               style={{ background: "linear-gradient(135deg,#1a1a2e 0%,#16213e 100%)", border: "1px solid rgba(255,255,255,0.06)", boxShadow: "0 4px 20px rgba(0,0,0,0.15)" }}>
               <div className="absolute -right-4 -top-4 w-24 h-24 rounded-full" style={{ background: "rgba(99,102,241,0.1)" }} />
               <div className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0 text-sm" style={{ background: "rgba(245,200,66,0.15)", border: "1px solid rgba(245,200,66,0.2)" }}>💡</div>
@@ -510,8 +483,8 @@ export default function Dashboard() {
               </div>
             </div>
 
-            {/* ── Main grid — 1 col on mobile, 3 col on desktop ── */}
-            <div className="grid grid-cols-1 md:grid-cols-[1fr_1fr_260px] gap-4" style={{ minHeight: 0 }}>
+            {/* ── Main grid ── */}
+            <div className="grid gap-4 min-h-0" style={{ gridTemplateColumns: "1fr 1fr 260px" }}>
 
               {/* My Tasks */}
               <div className="hov-card rounded-2xl flex flex-col overflow-hidden" style={{ background: "#fffef5", border: "1px solid rgba(245,200,66,0.25)", boxShadow: "0 4px 16px rgba(245,200,66,0.1)", borderTop: "3px solid #f5c842" }}>
@@ -541,7 +514,7 @@ export default function Dashboard() {
                       style={newPriority === "urgent" ? { background: "#ef4444", color: "#fff" } : { background: "#f0ebe3", color: "#9b8f82" }}>🔴 Urgent</button>
                   </div>
                 </div>
-                <div className="px-3 py-3 space-y-1.5">
+                <div className="flex-1 overflow-y-auto px-3 py-3 space-y-1.5">
                   {[...tasks].sort((a, _b) => a.priority === "urgent" ? -1 : 1).map(task => (
                     <div key={task.id} className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl group transition-all"
                       style={{ background: task.done ? "rgba(245,200,66,0.05)" : task.priority === "urgent" ? "#fff1f0" : "#fff", border: `1px solid ${task.done ? "rgba(245,200,66,0.15)" : task.priority === "urgent" ? "#ffd6d3" : "rgba(245,200,66,0.3)"}` }}>
@@ -589,7 +562,7 @@ export default function Dashboard() {
                     ))}
                   </div>
                 </div>
-                <div className="px-3 py-3 space-y-1.5">
+                <div className="flex-1 overflow-y-auto px-3 py-3 space-y-1.5">
                   {teamTasks.map(task => (
                     <div key={task.id} className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl group transition-all"
                       style={{ background: task.done ? "rgba(139,92,246,0.05)" : "#fff", border: `1px solid ${task.done ? "rgba(139,92,246,0.12)" : "rgba(139,92,246,0.25)"}` }}>
@@ -604,7 +577,7 @@ export default function Dashboard() {
 
               {/* Right column */}
               <div className="flex flex-col gap-3 min-h-0">
-                {/* Progress ring */}
+                {/* Progress ring — bigger, more prominent */}
                 <div className="hov-card rounded-2xl p-5 flex flex-col items-center shrink-0"
                   style={{ background: "#fff", border: "1px solid rgba(0,0,0,0.06)", boxShadow: "0 4px 16px rgba(0,0,0,0.07)" }}>
                   <div className="flex items-center gap-2 mb-4 self-start">
@@ -653,7 +626,7 @@ export default function Dashboard() {
                       <button onClick={addGoal} className="px-2.5 py-1.5 rounded-xl text-[11px] font-bold shrink-0" style={{ background: "#f5c842", color: "#1a1a2e" }}>Add</button>
                     </div>
                   </div>
-                  <div className="px-3 py-3 space-y-1.5">
+                  <div className="flex-1 overflow-y-auto px-3 py-3 space-y-1.5">
                     {goals.map(goal => (
                       <div key={goal.id} className="flex items-center gap-2.5 px-3 py-2 rounded-xl group"
                         style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.06)" }}>
@@ -667,8 +640,8 @@ export default function Dashboard() {
               </div>
             </div>
 
-            {/* ── Daily Notes — full width on mobile ── */}
-            <div className="rounded-2xl flex flex-col overflow-hidden shrink-0 w-full" style={{ height: 110, background: "#fff", border: "1px solid #e5ddd4", borderLeft: "3px solid #22c55e", boxShadow: "0 4px 16px rgba(0,0,0,0.07)" }}>
+            {/* ── Daily Notes ── */}
+            <div className="rounded-2xl flex flex-col overflow-hidden shrink-0" style={{ height: 110, background: "#fff", border: "1px solid #e5ddd4", borderLeft: "3px solid #22c55e", boxShadow: "0 4px 16px rgba(0,0,0,0.07)" }}>
               <div className="flex items-center gap-1 px-4 py-1.5 shrink-0 flex-wrap" style={{ borderBottom: "1px solid rgba(0,0,0,0.05)" }}>
                 <div className="w-2 h-2 rounded-full bg-green-400 shrink-0 mr-1" />
                 <span className="text-[11px] font-black mr-2" style={{ color: "#1a1a2e" }}>Daily Notes</span>
@@ -698,7 +671,7 @@ export default function Dashboard() {
 
         {/* ══════════════ MY TASKS PAGE ══════════════ */}
         {activePage === "My Tasks" && (
-          <div className="flex-1 overflow-y-auto md:overflow-hidden px-4 md:px-7 pt-4 pb-6 flex flex-col md:flex-row gap-5 min-h-0" style={{ background: "#eef0f5" }}>
+          <div className="flex-1 overflow-y-auto px-4 md:px-7 pt-4 pb-20 md:pb-6 flex flex-col md:flex-row gap-5" style={{ background: "#eef0f5" }}>
             {/* Left panel */}
             <div className="w-full md:w-56 shrink-0 flex flex-col gap-3">
               <div className="rounded-2xl p-5" style={{ background: "#fff", border: "1px solid rgba(0,0,0,0.06)", boxShadow: "0 2px 8px rgba(0,0,0,0.05)" }}>
@@ -739,8 +712,8 @@ export default function Dashboard() {
             </div>
 
             {/* Task columns */}
-            <div className="flex-1 flex flex-col md:flex-row gap-4 min-h-0 min-w-0">
-              <div className="flex-1 flex flex-col overflow-hidden rounded-2xl" style={{ background: "#fffef5", border: "1px solid rgba(245,200,66,0.25)", boxShadow: "0 4px 16px rgba(245,200,66,0.1)", borderTop: "3px solid #f5c842", minHeight: 280 }}>
+            <div className="flex-1 flex gap-4 min-h-0 min-w-0">
+              <div className="flex-1 flex flex-col overflow-hidden rounded-2xl" style={{ background: "#fffef5", border: "1px solid rgba(245,200,66,0.25)", boxShadow: "0 4px 16px rgba(245,200,66,0.1)", borderTop: "3px solid #f5c842" }}>
                 <div className="px-5 pt-4 pb-3 shrink-0 flex items-center gap-2" style={{ borderBottom: "1px solid rgba(245,200,66,0.15)" }}>
                   <div className="w-2 h-2 rounded-full" style={{ background: "#f5c842" }} />
                   <span className="text-[13px] font-black" style={{ color: "#1a1a2e" }}>Pending</span>
@@ -762,7 +735,7 @@ export default function Dashboard() {
                   ))}
                 </div>
               </div>
-              <div className="flex-1 flex flex-col overflow-hidden rounded-2xl" style={{ background: "#f0fdf4", border: "1px solid rgba(34,197,94,0.2)", boxShadow: "0 4px 16px rgba(34,197,94,0.08)", borderTop: "3px solid #22c55e", minHeight: 280 }}>
+              <div className="flex-1 flex flex-col overflow-hidden rounded-2xl" style={{ background: "#f0fdf4", border: "1px solid rgba(34,197,94,0.2)", boxShadow: "0 4px 16px rgba(34,197,94,0.08)", borderTop: "3px solid #22c55e" }}>
                 <div className="px-5 pt-4 pb-3 shrink-0 flex items-center gap-2" style={{ borderBottom: "1px solid rgba(34,197,94,0.15)" }}>
                   <div className="w-2 h-2 rounded-full bg-green-400" />
                   <span className="text-[13px] font-black" style={{ color: "#1a1a2e" }}>Completed</span>
@@ -785,7 +758,7 @@ export default function Dashboard() {
 
         {/* ══════════════ TEAM TASKS PAGE ══════════════ */}
         {activePage === "Team Tasks" && (
-          <div className="flex-1 overflow-y-auto md:overflow-hidden px-4 md:px-7 pt-4 pb-6 flex flex-col md:flex-row gap-5 min-h-0" style={{ background: "#eef0f5" }}>
+          <div className="flex-1 overflow-y-auto px-4 md:px-7 pt-4 pb-20 md:pb-6 flex flex-col md:flex-row gap-5" style={{ background: "#eef0f5" }}>
             <div className="w-full md:w-56 shrink-0 flex flex-col gap-3">
               <div className="rounded-2xl p-5" style={{ background: "#fff", border: "1px solid rgba(0,0,0,0.06)", boxShadow: "0 2px 8px rgba(0,0,0,0.05)" }}>
                 <p className="text-[9px] font-black uppercase tracking-widest mb-4" style={{ color: "#a09080" }}>Assign Task</p>
@@ -831,7 +804,7 @@ export default function Dashboard() {
                 {members.length===0 && <p className="text-[11px]" style={{ color: "rgba(255,255,255,0.2)" }}>No members yet.</p>}
               </div>
             </div>
-            <div className="flex-1 flex flex-col overflow-hidden rounded-2xl" style={{ background: "#faf8ff", border: "1px solid rgba(139,92,246,0.2)", boxShadow: "0 4px 16px rgba(139,92,246,0.1)", borderTop: "3px solid #8b5cf6", minHeight: 300 }}>
+            <div className="flex-1 flex flex-col overflow-hidden rounded-2xl" style={{ background: "#faf8ff", border: "1px solid rgba(139,92,246,0.2)", boxShadow: "0 4px 16px rgba(139,92,246,0.1)", borderTop: "3px solid #8b5cf6" }}>
               <div className="px-5 pt-4 pb-3 shrink-0 flex items-center gap-2" style={{ borderBottom: "1px solid rgba(139,92,246,0.12)" }}>
                 <div className="w-2 h-2 rounded-full" style={{ background: "#8b5cf6" }} />
                 <span className="text-[13px] font-black" style={{ color: "#1a1a2e" }}>All Team Tasks</span>
@@ -855,7 +828,7 @@ export default function Dashboard() {
 
         {/* ══════════════ UPWORK JOBS PAGE ══════════════ */}
         {activePage === "Upwork Jobs" && (
-          <div className="flex-1 overflow-y-auto md:overflow-hidden px-4 md:px-7 pt-4 pb-6 flex flex-col md:flex-row gap-5 min-h-0" style={{ background: "#eef0f5" }}>
+          <div className="flex-1 overflow-y-auto px-4 md:px-7 pt-4 pb-20 md:pb-6 flex flex-col md:flex-row gap-5" style={{ background: "#eef0f5" }}>
             <div className="w-full md:w-56 shrink-0 flex flex-col gap-3">
               <div className="rounded-2xl p-5" style={{ background: "#fff", border: "1px solid rgba(0,0,0,0.06)", boxShadow: "0 2px 8px rgba(0,0,0,0.05)" }}>
                 <p className="text-[9px] font-black uppercase tracking-widest mb-4" style={{ color: "#a09080" }}>Track Job</p>
@@ -879,7 +852,7 @@ export default function Dashboard() {
                 </div>
               </div>
             </div>
-            <div className="flex-1 flex flex-col overflow-hidden rounded-2xl" style={{ background: "#fff8f5", border: "1px solid rgba(249,115,22,0.2)", boxShadow: "0 4px 16px rgba(249,115,22,0.1)", borderTop: "3px solid #f97316", minHeight: 300 }}>
+            <div className="flex-1 flex flex-col overflow-hidden rounded-2xl" style={{ background: "#fff8f5", border: "1px solid rgba(249,115,22,0.2)", boxShadow: "0 4px 16px rgba(249,115,22,0.1)", borderTop: "3px solid #f97316" }}>
               <div className="px-5 pt-4 pb-3 shrink-0 flex items-center gap-2" style={{ borderBottom: "1px solid rgba(249,115,22,0.12)" }}>
                 <div className="w-2 h-2 rounded-full" style={{ background: "#f97316" }} />
                 <span className="text-[13px] font-black" style={{ color: "#1a1a2e" }}>Tracked Jobs</span>
@@ -908,7 +881,7 @@ export default function Dashboard() {
                         </div>
                         <button onClick={() => deleteJob(job.id)} className="opacity-0 group-hover:opacity-100 text-xs shrink-0" style={{ color: "#c4b8aa" }}>✕</button>
                       </div>
-                      <div className="flex gap-1.5 flex-wrap">
+                      <div className="flex gap-1.5">
                         {(["Shortlisted","Proposal Sent","Rejected"] as Job["status"][]).map(st => (
                           <button key={st} onClick={() => updateJobStatus(job.id, job.status===st?"New":st)}
                             className="text-[10px] px-2.5 py-1 rounded-lg font-bold transition-all"
@@ -927,7 +900,7 @@ export default function Dashboard() {
 
         {/* ══════════════ WEEKLY GOALS PAGE ══════════════ */}
         {activePage === "Weekly Goals" && (
-          <div className="flex-1 overflow-y-auto md:overflow-hidden px-4 md:px-7 pt-4 pb-6 flex flex-col md:flex-row gap-5 min-h-0" style={{ background: "#eef0f5" }}>
+          <div className="flex-1 overflow-y-auto px-4 md:px-7 pt-4 pb-20 md:pb-6 flex flex-col md:flex-row gap-5" style={{ background: "#eef0f5" }}>
             <div className="w-full md:w-56 shrink-0 flex flex-col gap-3">
               <div className="rounded-2xl p-5" style={{ background: "#fff", border: "1px solid rgba(0,0,0,0.06)", boxShadow: "0 2px 8px rgba(0,0,0,0.05)" }}>
                 <p className="text-[9px] font-black uppercase tracking-widest mb-4" style={{ color: "#a09080" }}>New Goal</p>
@@ -951,7 +924,7 @@ export default function Dashboard() {
                 <p className="text-[11px] mt-3 font-medium" style={{ color: "rgba(255,255,255,0.3)" }}>{doneGoals} of {goals.length} goals done</p>
               </div>
             </div>
-            <div className="flex-1 flex flex-col overflow-hidden rounded-2xl" style={{ background: "#fffef0", border: "1px solid rgba(245,200,66,0.3)", boxShadow: "0 4px 16px rgba(245,200,66,0.12)", borderTop: "3px solid #f5c842", minHeight: 300 }}>
+            <div className="flex-1 flex flex-col overflow-hidden rounded-2xl" style={{ background: "#fffef0", border: "1px solid rgba(245,200,66,0.3)", boxShadow: "0 4px 16px rgba(245,200,66,0.12)", borderTop: "3px solid #f5c842" }}>
               <div className="px-5 pt-4 pb-3 shrink-0 flex items-center gap-2" style={{ borderBottom: "1px solid rgba(245,200,66,0.2)" }}>
                 <div className="w-2 h-2 rounded-full" style={{ background: "#f5c842" }} />
                 <span className="text-[13px] font-black" style={{ color: "#1a1a2e" }}>This Week&apos;s Goals</span>
@@ -975,8 +948,8 @@ export default function Dashboard() {
 
         {/* ══════════════ NOTES PAGE ══════════════ */}
         {activePage === "Notes" && (
-          <div className="flex-1 overflow-y-auto md:overflow-hidden px-4 md:px-7 pt-4 pb-6 flex flex-col md:flex-row gap-5 min-h-0" style={{ background: "#eef0f5" }}>
-            <div className="flex-1 flex flex-col overflow-hidden rounded-2xl" style={{ background: "#f0fdf8", border: "1px solid rgba(34,197,94,0.2)", boxShadow: "0 4px 16px rgba(34,197,94,0.08)", borderTop: "3px solid #22c55e", minHeight: 320 }}>
+          <div className="flex-1 overflow-y-auto px-4 md:px-7 pt-4 pb-20 md:pb-6 flex flex-col md:flex-row gap-5" style={{ background: "#eef0f5" }}>
+            <div className="flex-1 flex flex-col overflow-hidden rounded-2xl" style={{ background: "#f0fdf8", border: "1px solid rgba(34,197,94,0.2)", boxShadow: "0 4px 16px rgba(34,197,94,0.08)", borderTop: "3px solid #22c55e" }}>
               <div className="px-4 py-2.5 shrink-0 flex items-center gap-1 flex-wrap" style={{ borderBottom: "1px solid rgba(34,197,94,0.15)", background: "rgba(240,253,248,0.8)" }}>
                 <span className="text-[11px] font-black mr-3" style={{ color: "#1a1a2e" }}>📝 Daily Notes</span>
                 {[
@@ -1008,7 +981,6 @@ export default function Dashboard() {
                 dangerouslySetInnerHTML={{ __html: noteContent }}
                 onBlur={e => saveNote(e.currentTarget.innerHTML)} />
             </div>
-            {/* Shortcuts panel — below editor on mobile, beside it on desktop */}
             <div className="w-full md:w-52 shrink-0 flex flex-col gap-4">
               <div className="rounded-2xl p-5" style={{ background: "#0f1419", border: "1px solid rgba(255,255,255,0.06)", boxShadow: "0 4px 16px rgba(0,0,0,0.2)" }}>
                 <p className="text-[9px] font-black uppercase tracking-widest mb-4" style={{ color: "rgba(255,255,255,0.3)" }}>Shortcuts</p>
