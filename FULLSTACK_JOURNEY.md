@@ -179,6 +179,8 @@ areeb-dashboard/
 | DNS error | Typo in Supabase URL (double `k`) | Fixed URL in `.env.local` |
 | Login worked but dashboard didn't open | Session in localStorage, middleware reads cookies | Switched to `createBrowserClient` from `@supabase/ssr` |
 | Vercel build failed | `package-lock.json` not committed | Committed and pushed `package-lock.json` |
+| Mobile cards overlapping/cut off | `h-screen overflow-hidden` locked the entire page to screen height — cards had no room to grow | Added `app-wrapper` CSS class, overrode `height: auto` and `overflow: visible` on mobile in `globals.css` |
+| CSS classes not overriding layout | Inline `style={{}}` always wins over CSS classes — media queries in `<style>` tags or CSS files cannot override inline styles | Moved `display: grid` and `gridTemplateColumns` out of inline styles into CSS classes so media queries could override them on mobile |
 
 ---
 
@@ -187,7 +189,6 @@ areeb-dashboard/
 - [ ] History page — view completed tasks from previous days
 - [ ] Notifications — browser push notifications for urgent tasks
 - [ ] Admin view — Hasham can see all team members' tasks
-- [ ] Mobile responsive — works properly on phone
 - [ ] Dark/light mode toggle
 
 ---
@@ -199,3 +200,6 @@ areeb-dashboard/
 3. **Soft deletes** — never permanently delete data in a real app
 4. **RLS** — always protect your database rows so users can't see each other's data
 5. **Environment variables** — never hardcode secrets, use `.env.local` locally and Vercel settings in production
+6. **Inline styles always win** — `style={{}}` in JSX cannot be overridden by any CSS class or media query. Always use CSS classes when you need responsive behavior
+7. **`h-screen overflow-hidden` breaks mobile** — this pattern locks the page to screen height. On desktop it's fine because content is horizontal. On mobile everything becomes vertical and gets squished. Always unlock height on mobile with `height: auto`
+8. **Diagnose before fixing** — always find the root cause first. The mobile issue looked like a grid problem but was actually a page height problem one level up
