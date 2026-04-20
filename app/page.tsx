@@ -279,7 +279,9 @@ export default function Dashboard() {
       ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 4px; }
       @media (max-width: 767px) {
         .desktop-only { display: none !important; }
-        .mobile-scroll { overflow-y: auto !important; overflow-x: hidden !important; }
+        .dash-grid { display: flex !important; flex-direction: column !important; gap: 16px !important; }
+        .main-grid { display: flex !important; flex-direction: column !important; gap: 16px !important; }
+        .page-content { overflow-y: auto !important; }
       }
       @media (min-width: 768px) {
         .mobile-only { display: none !important; }
@@ -402,7 +404,7 @@ export default function Dashboard() {
 
         {/* ══════════════ DASHBOARD PAGE ══════════════ */}
         {activePage === "Dashboard" && (
-          <div className="flex-1 overflow-y-auto px-4 md:px-7 pb-20 md:pb-6" style={{ display: "grid", gridTemplateRows: "auto auto 1fr auto", gap: 16, background: "#eef0f5" }}>
+          <div className="dash-grid page-content flex-1 overflow-y-auto px-4 md:px-7 pb-20 md:pb-6" style={{ display: "grid", gridTemplateRows: "auto auto 1fr auto", gap: 16, background: "#eef0f5" }}>
 
             {/* ── Stat cards row ── */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -484,7 +486,7 @@ export default function Dashboard() {
             </div>
 
             {/* ── Main grid ── */}
-            <div className="grid gap-4 min-h-0" style={{ gridTemplateColumns: "1fr 1fr 260px" }}>
+            <div className="main-grid grid gap-4 min-h-0" style={{ gridTemplateColumns: "1fr 1fr 260px" }}>
 
               {/* My Tasks */}
               <div className="hov-card rounded-2xl flex flex-col overflow-hidden" style={{ background: "#fffef5", border: "1px solid rgba(245,200,66,0.25)", boxShadow: "0 4px 16px rgba(245,200,66,0.1)", borderTop: "3px solid #f5c842" }}>
