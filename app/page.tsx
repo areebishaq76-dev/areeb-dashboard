@@ -404,7 +404,7 @@ export default function Dashboard() {
 
         {/* ══════════════ DASHBOARD PAGE ══════════════ */}
         {activePage === "Dashboard" && (
-          <div className="dash-grid page-content flex-1 overflow-y-auto px-4 md:px-7 pb-20 md:pb-6" style={{ display: "grid", gridTemplateRows: "auto auto 1fr auto", gap: 16, background: "#eef0f5" }}>
+          <div className="dash-grid page-content flex-1 overflow-y-auto px-4 md:px-7 pb-20 md:pb-6" style={{ background: "#eef0f5" }}>
 
             {/* ── Stat cards row ── */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -486,7 +486,7 @@ export default function Dashboard() {
             </div>
 
             {/* ── Main grid ── */}
-            <div className="main-grid grid gap-4 min-h-0" style={{ gridTemplateColumns: "1fr 1fr 260px" }}>
+            <div className="main-grid gap-4 min-h-0">
 
               {/* My Tasks */}
               <div className="hov-card rounded-2xl flex flex-col overflow-hidden" style={{ background: "#fffef5", border: "1px solid rgba(245,200,66,0.25)", boxShadow: "0 4px 16px rgba(245,200,66,0.1)", borderTop: "3px solid #f5c842" }}>
