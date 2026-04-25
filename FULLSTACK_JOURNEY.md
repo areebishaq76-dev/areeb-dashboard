@@ -166,7 +166,7 @@ areeb-dashboard/
 ├── proxy.ts              ← Middleware: protects routes
 ├── .env.local            ← API keys (never commit this)
 ├── supabase-schema.sql   ← Database setup SQL
-└── LEARNING.md           ← This file
+└── FULLSTACK_JOURNEY.md  ← This learning journal
 ```
 
 ---
