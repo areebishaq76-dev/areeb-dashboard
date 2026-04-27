@@ -184,11 +184,56 @@ areeb-dashboard/
 
 ---
 
+## Product Audit (April 2026)
+
+**Overall Score: 5/10** — Design 7/10 | Product 4/10 | Growth 1/10
+
+### Critical Issues
+- **Team Tasks is broken** — members are just strings, not real accounts. No login, no email, no real collaboration
+- **No onboarding** — users land cold with 6 sections and zero guidance. Est. 40-50% bounce
+- **No error handling or loading states** — silent failures, duplicate submissions on double-click
+- **Notification permission fires on page load** — users reject it, urgent reminders silently fail forever
+- **Mobile bottom nav labels truncated** — "My Tasks" → "My", "Team Tasks" → "Team"
+
+### Performance Issues
+- 1,012-line single component — whole app re-renders on every keystroke
+- 21 `useState` hooks in one component — no `useCallback`, no `useMemo`
+- Fix: split into `TaskBoard.tsx`, `TeamTasks.tsx`, `NotesEditor.tsx`, `hooks/useTasks.ts`
+
+### Copy Fixes
+- "Track and prioritize your personal tasks" → **"Prioritize by urgency. Get reminded before deadlines slip."**
+- Quote strip → replace with contextual nudges like **"You completed 8 tasks today — 2 more than yesterday."**
+- Urgent reminder → **"Still stuck? Break it into one smaller step and start there."**
+
+### Prioritized Fix List
+
+**HIGH (Must Do)**
+1. Real team collaboration — actual user accounts, invites, email on task assignment
+2. Error handling + loading states on every async action
+3. Onboarding flow after signup
+4. Fix mobile bottom nav labels
+
+**MEDIUM (Quick Wins)**
+5. Break monolith into components (30-40% performance gain)
+6. Add task filtering and sorting
+7. Replace quote strip with contextual insights
+8. Fix notification permission — ask only on first urgent task
+
+**LOW (If Scaling)**
+9. Recurring tasks
+10. Data export (CSV, PDF weekly recap)
+11. Usage analytics
+12. Remove or fully integrate Upwork Jobs
+
+---
+
 ## What's Next (Future Sessions)
 
+- [ ] Fix error handling + loading states
+- [ ] Add onboarding flow
+- [ ] Break component into smaller files
+- [ ] Real team collaboration (actual user accounts)
 - [ ] History page — view completed tasks from previous days
-- [ ] Notifications — browser push notifications for urgent tasks
-- [ ] Admin view — Hasham can see all team members' tasks
 - [ ] Dark/light mode toggle
 
 ---
